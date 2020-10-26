@@ -24,7 +24,7 @@ function mainMenu() {
       'Add a Role',
       'Add an Employee',
       'Update an Employee Role',
-      'Close Program'
+      'Exit Program'
     ]
   })
     .then(({ action }) => {
@@ -159,7 +159,7 @@ async function addEmployee() {
   const [employees] = await connection.promise().query(employeeSql);
 
   // add option for no manager
-  employees.unshift({ id: null, name: 'None' });
+  employees.unshift({ value: null, name: 'None' });
 
   inquirer.prompt([
     {
