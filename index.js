@@ -40,12 +40,16 @@ function mainMenu() {
           viewEmployees();
           break;
         case 'Add a Department':
+          addDepartment();
           break;
         case 'Add a Role':
+          addRole();
           break;
         case 'Add an Employee':
+          addEmployee();
           break;
         case 'Update an Employee Role':
+          updateEmployeeRole();
           break;
         case 'Close Program':
           connection.close();
@@ -83,7 +87,6 @@ LEFT JOIN department ON department_id = department.id`;
   });
 }
 
-
 // view employees
 function viewEmployees() {
   const sql = `
@@ -105,6 +108,25 @@ LEFT JOIN employee AS m ON e.manager_id = m.id`;
   });
 
   mainMenu();
+}
+
+// add department
+function addDepartment() {
+  inquirer.prompt({
+    type: 'input',
+    message: 'Enter the name of the new department:',
+    name: 'departmentName'
+  })
+    .then(({ departmentName }) => {
+      const sql = `INSERT INTO department SET ?`;
+      connection.query(sql, { name: departmentName }, (err, results) => {
+        if (err) {
+          throw (err);
+        }
+        console.log('Department added');
+        mainMenu();
+      });
+    });
 }
 
 mainMenu();
