@@ -12,7 +12,18 @@ const connection = mysql.createConnection({
 });
 
 // view departments
-connection.query(`SELECT * FROM department`, (err, results) => {
+// connection.query(`SELECT * FROM department`, (err, results) => {
+//   if (err) {
+//     throw (err);
+//   }
+//   console.table(results);
+//   connection.close();
+// });
+
+// view roles
+connection.query(`SELECT role.id, title, name AS department, salary
+                    FROM role
+                    LEFT JOIN department ON department_id = department.id`, (err, results) => {
   if (err) {
     throw (err);
   }
