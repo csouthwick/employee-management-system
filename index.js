@@ -28,7 +28,6 @@ function mainMenu() {
     ]
   })
     .then(({ action }) => {
-      console.log('\n');
       switch (action) {
         case 'View All Departments':
           viewDepartments();
@@ -60,8 +59,7 @@ function mainMenu() {
 
 // view departments
 function viewDepartments() {
-  const sql = `SELECT * FROM department`;
-  connection.query(sql, (err, results) => {
+  connection.query(`SELECT * FROM department`, (err, results) => {
     if (err) {
       throw (err);
     }
@@ -124,6 +122,49 @@ function addDepartment() {
           throw (err);
         }
         console.log('Department added');
+        mainMenu();
+      });
+    });
+}
+
+// add role
+function addRole() {
+  connection.query(`SELECT * FROM department`, (err, results) => {
+    if (err) {
+      throw (err);
+    }
+    addRolePrompts(results);
+  });
+}
+
+function addRolePrompts(departments) {
+  inquirer.prompt([
+    {
+      type: 'input',
+      message: 'Enter the title of the new role:',
+      name: 'title'
+    },
+    {
+      type: 'input',
+      message: 'Enter the salary of the new role:',
+      name: 'salary'
+    },
+    {
+      type: 'list',
+      message: 'Select the department the role belongs to:',
+      name: 'department',
+      choices: departments
+    }
+  ])
+    .then(({ title, salary, department }) => {
+      department_id = departments.find(dept => dept.name === department).id;
+      const sql = `INSERT INTO role SET ?`;
+      const params = { title, salary, department_id };
+      connection.query(sql, params, (err, results) => {
+        if (err) {
+          throw (err);
+        }
+        console.log('Role added');
         mainMenu();
       });
     });
