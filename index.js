@@ -11,3 +11,11 @@ const connection = mysql.createConnection({
   database: 'employee_db'
 });
 
+// view departments
+connection.query(`SELECT * FROM department`, (err, results) => {
+  if (err) {
+    throw (err);
+  }
+  console.table(results);
+  connection.close();
+});
