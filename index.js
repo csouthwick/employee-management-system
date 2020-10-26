@@ -59,14 +59,11 @@ function mainMenu() {
 
 // view departments
 function viewDepartments() {
-  connection.query(`SELECT * FROM department`, (err, results) => {
-    if (err) {
-      throw (err);
-    }
-    console.table(results);
-
-    mainMenu();
-  });
+  connection.promise().query(`SELECT * FROM department`)
+    .then(([departments]) => {
+      console.table(departments);
+      mainMenu();
+    });
 }
 
 // view roles
@@ -75,14 +72,11 @@ function viewRoles() {
 SELECT role.id, title, name AS department, salary
 FROM role
 LEFT JOIN department ON department_id = department.id`;
-  connection.query(sql, (err, results) => {
-    if (err) {
-      throw (err);
-    }
-    console.table(results);
-
-    mainMenu();
-  });
+  connection.promise().query(sql)
+    .then(([roles]) => {
+      console.table(roles);
+      mainMenu();
+    });
 }
 
 // view employees
@@ -96,16 +90,13 @@ LEFT JOIN role ON e.role_id = role.id
 LEFT JOIN department ON department_id = department.id
 LEFT JOIN employee AS m ON e.manager_id = m.id`;
 
-  connection.query(sql, (err, results) => {
-    if (err) {
-      throw (err);
-    }
-    console.log('\n');
-    console.table(results);
-    console.log('\n');
-  });
-
-  mainMenu();
+  connection.promise().query(sql)
+    .then(([employees]) => {
+      console.log('\n');
+      console.table(employees);
+      console.log('\n');
+      mainMenu();
+    });
 }
 
 // add department
@@ -117,27 +108,17 @@ function addDepartment() {
   })
     .then(({ departmentName }) => {
       const sql = `INSERT INTO department SET ?`;
-      connection.query(sql, { name: departmentName }, (err, results) => {
-        if (err) {
-          throw (err);
-        }
-        console.log('Department added');
-        mainMenu();
-      });
+      return connection.promise().query(sql, { name: departmentName });
+    })
+    .then(({ results }) => {
+      console.log('Department added');
+      mainMenu();
     });
 }
 
 // add role
-function addRole() {
-  connection.query(`SELECT * FROM department`, (err, results) => {
-    if (err) {
-      throw (err);
-    }
-    addRolePrompts(results);
-  });
-}
-
-function addRolePrompts(departments) {
+async function addRole() {
+  const [departments] = await connection.promise().query(`SELECT * FROM department`);
   inquirer.prompt([
     {
       type: 'input',
