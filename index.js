@@ -50,7 +50,7 @@ function mainMenu() {
         case 'Update an Employee Role':
           updateEmployeeRole();
           break;
-        case 'Close Program':
+        case 'Exit Program':
           connection.close();
           break;
       }
@@ -191,6 +191,37 @@ async function addEmployee() {
     })
     .then(({ results }) => {
       console.log('Employee added');
+      mainMenu();
+    });
+}
+
+async function updateEmployeeRole() {
+  // await these database queries to make it easier to use the values later
+  // rename object properties (AS name and value) for use with Inquirer
+  const employeeSql = `SELECT id AS value, CONCAT(first_name, " ", last_name) AS name from employee`;
+  const [employees] = await connection.promise().query(employeeSql);
+  const [roles] = await connection.promise().query(`SELECT id AS value, title AS name FROM role`);
+
+  inquirer.prompt([
+    {
+      type: 'list',
+      message: 'Which employee\'s role do you want to update?',
+      name: 'id',
+      choices: employees
+    },
+    {
+      type: 'list',
+      message: 'What is the employee\'s new role?',
+      name: 'role_id',
+      choices: roles
+    }
+  ])
+    .then(({ id, role_id }) => {
+      const sql = `UPDATE employee SET ? WHERE ?`;
+      return connection.promise().query(sql, [{ role_id }, { id }]);
+    })
+    .then(({ results }) => {
+      console.log('Employee\'s role has been updated');
       mainMenu();
     });
 }
