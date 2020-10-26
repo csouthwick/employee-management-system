@@ -142,13 +142,11 @@ async function addRole() {
       department_id = departments.find(dept => dept.name === department).id;
       const sql = `INSERT INTO role SET ?`;
       const params = { title, salary, department_id };
-      connection.query(sql, params, (err, results) => {
-        if (err) {
-          throw (err);
-        }
-        console.log('Role added');
-        mainMenu();
-      });
+      connection.promise().query(sql, params)
+        .then(({ results }) => {
+          console.log('Role added');
+          mainMenu();
+        });
     });
 }
 
