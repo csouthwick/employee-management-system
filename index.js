@@ -118,6 +118,7 @@ function addDepartment() {
 
 // add role
 async function addRole() {
+  // await database query to make it easier to use the values later
   const [departments] = await connection.promise().query(`SELECT * FROM department`);
   inquirer.prompt([
     {
@@ -148,6 +149,54 @@ async function addRole() {
         console.log('Role added');
         mainMenu();
       });
+    });
+}
+
+// add employee
+async function addEmployee() {
+  // await these database queries to make it easier to use the values later
+  const [roles] = await connection.promise().query(`SELECT id, title AS name FROM role`);
+  const employeeSql = `SELECT id, CONCAT(first_name, " ", last_name) AS name from employee`;
+  const [employees] = await connection.promise().query(employeeSql);
+
+  // add option for no manager
+  employees.unshift({ id: null, name: 'None' });
+
+  inquirer.prompt([
+    {
+      type: 'input',
+      message: 'What is the employee\'s first name?',
+      name: 'first_name'
+    },
+    {
+      type: 'input',
+      message: 'What is the employee\'s last name?',
+      name: 'last_name'
+    },
+    {
+      type: 'list',
+      message: 'What is the employee\'s role?',
+      name: 'role',
+      choices: roles
+    },
+    {
+      type: 'list',
+      message: 'Which employee do you want to set as manager for the selected employee?',
+      name: 'manager',
+      choices: employees
+    }
+  ])
+    .then(({ first_name, last_name, role, manager }) => {
+      const role_id = roles.find(roleObj => roleObj.name === role).id;
+      const manager_id = employees.find(employee => employee.name === manager).id;
+
+      const sql = `INSERT INTO employee SET ?`;
+      const params = { first_name, last_name, role_id, manager_id };
+      return connection.promise().query(sql, params);
+    })
+    .then(({ results }) => {
+      console.log('Employee added');
+      mainMenu();
     });
 }
 
